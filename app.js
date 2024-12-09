@@ -7,6 +7,7 @@ import compression from "compression";
 import http from "http";
 import https from "https";
 import jq from "node-jq";
+import fs from "fs";
 import { shield, beginShieldSync, getShieldBinary } from "./shield.js";
 import { makeRpc } from "./rpc.js";
 
