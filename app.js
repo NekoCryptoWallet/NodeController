@@ -8,7 +8,6 @@ import http from "http";
 import https from "https";
 import jq from "node-jq";
 import fs from "fs";
-import { shield, beginShieldSync, getShieldBinary } from "./shield.js";
 import { makeRpc } from "./rpc.js";
 
 const app = express();
@@ -20,11 +19,6 @@ const testnetRpcPort = process.env["TESTNET_RPC_PORT"];
 const allowedRpcs = process.env["ALLOWED_RPCS"].split(",");
 
 function setupServer(app) {
-  if (testnetRpcPort) {
-    beginShieldSync(true);
-  }
-
-  beginShieldSync(false);
   const certificatePath = process.env["HTTPS_CERTIFICATE_PATH"];
   const keyPath = process.env["HTTPS_KEY_PATH"];
   if (!certificatePath || !keyPath) {
@@ -82,33 +76,7 @@ async function handleRequest(isTestnet, req, res) {
   }
 }
 
-app.get("/mainnet/getshieldblocks", async function (req, res) {
-  res.send(JSON.stringify(shield["mainnet"].map(({ block }) => block)));
-});
-
-app.get("/mainnet/getshielddata", async (req, res) => {
-  const startBlock = req.query.startBlock || 0;
-  const startingByte = shield["mainnet"]
-    // Get the first block that's greater or equal than the requested starting block
-    .find(({ block }) => block >= startBlock)?.i;
-  console.log(startingByte);
-  if (startingByte === undefined) {
-    const noContent = 204;
-    res.status(noContent).send(Buffer.from([]));
-    return;
-  }
-  const shieldBinary = await getShieldBinary(false, startingByte);
-  res.set("X-Content-Length", shieldBinary.length);
-  res.send(shieldBinary);
-});
-
 app.get("/mainnet/:rpc", async (req, res) => handleRequest(false, req, res));
-if (testnetRpcPort) {
-  app.get("/testnet/getshieldblocks", async function (req, res) {
-    res.send(JSON.stringify(shield["testnet"]));
-  });
-  app.get("/testnet/:rpc", async (req, res) => handleRequest(true, req, res));
-}
 
 const server = setupServer(app);
 

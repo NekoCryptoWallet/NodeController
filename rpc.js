@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 const port = process.env["PORT"] || 3000;
-const rpcPort = process.env["RPC_PORT"] || 51473;
+const rpcPort = process.env["RPC_PORT"] || 8022;
 const testnetRpcPort = process.env["TESTNET_RPC_PORT"];
 
 const encodeBase64 = (data) => {
@@ -11,7 +11,7 @@ const encodeBase64 = (data) => {
 export async function makeRpc(isTestnet, name, ...params) {
   try {
     const output = await fetch(
-      `http://127.0.0.1:${isTestnet ? testnetRpcPort : rpcPort}/`,
+      `http://127.0.0.1:${rpcPort}/`,
       {
         method: "POST",
         headers: {
@@ -21,7 +21,7 @@ export async function makeRpc(isTestnet, name, ...params) {
         },
         body: JSON.stringify({
           jsonrpc: "1.0",
-          id: "pivxRerouter",
+          id: "curltest",
           method: name,
           params,
         }),
